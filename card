@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital Business Card</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #000;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .card {
+      background: #111;
+      border: 0.5px solid #2a2a2a;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 360px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card-top-bar {
+      height: 3px;
+      background: linear-gradient(90deg, #fff 0%, #444 100%);
+    }
+
+    .card-body { padding: 2rem 1.75rem 1.5rem; }
+
+    .avatar-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .avatar {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      border: 2px solid #2a2a2a;
+      background: #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-size: 32px;
+      font-weight: 500;
+      color: #555;
+    }
+
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .name {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .job {
+      text-align: center;
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 1.75rem;
+    }
+
+    .divider { border: none; border-top: 0.5px solid #1e1e1e; margin-bottom: 1.25rem; }
+
+    .details { display: flex; flex-direction: column; gap: 14px; margin-bottom: 1.75rem; }
+
+    .detail-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .detail-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: #1a1a1a;
+      border: 0.5px solid #2a2a2a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .detail-icon svg { width: 16px; height: 16px; color: #888; }
+
+    .detail-text { flex: 1; }
+    .detail-label { font-size: 11px; color: #555; margin-bottom: 1px; }
+    .detail-value { font-size: 14px; color: #ddd; }
+
+    .detail-row.link:hover .detail-value { color: #fff; }
+    .detail-row.link .detail-icon { transition: background 0.15s; }
+    .detail-row.link:hover .detail-icon { background: #222; }
+
+    .save-btn {
+      display: block;
+      width: 100%;
+      background: #fff;
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .save-btn:hover { background: #ddd; }
+
+    .footer {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 11px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="card">
+      <div class="card-top-bar"></div>
+      <div class="card-body">
+        <div class="avatar-wrap">
+          <div class="avatar" id="avatar"><span id="avatarInitials">?</span></div>
+        </div>
+        <div class="name" id="cardName">—</div>
+        <div class="job" id="cardJob"></div>
+        <hr class="divider">
+        <div class="details" id="details"></div>
+        <a class="save-btn" id="saveBtn" href="#">Save Contact</a>
+      </div>
+    </div>
+    <div class="footer">Digital Business Card</div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const name  = params.get('n') || '';
+    const title = params.get('t') || '';
+    const phone = params.get('p') || '';
+    const ig    = params.get('ig') || '';
+    const tt    = params.get('tt') || '';
+    const img   = params.get('img') || '';
+
+    // Set page title
+    if (name) document.title = name + ' — Digital Card';
+
+    // Avatar
+    if (img) {
+      document.getElementById('avatar').innerHTML = '<img src="' + img + '" alt="' + name + '">';
+    } else if (name) {
+      document.getElementById('avatarInitials').textContent =
+        name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    }
+
+    // Name + job
+    document.getElementById('cardName').textContent = name || 'No name provided';
+    if (title) document.getElementById('cardJob').textContent = title;
+
+    // Details rows
+    const details = document.getElementById('details');
+
+    function addRow(label, value, href, iconSVG) {
+      const a = document.createElement(href ? 'a' : 'div');
+      a.className = 'detail-row' + (href ? ' link' : '');
+      if (href) { a.href = href; a.target = '_blank'; a.rel = 'noopener'; }
+      a.innerHTML = `
+        <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${iconSVG}</svg></div>
+        <div class="detail-text">
+          <div class="detail-label">${label}</div>
+          <div class="detail-value">${value}</div>
+        </div>`;
+      details.appendChild(a);
+    }
+
+    const phoneIcon = '<path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.81 19.79 19.79 0 01.1 2.18 2 2 0 012.08 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.29 6.29l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>';
+    const igIcon = '<rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>';
+    const ttIcon = '<path fill="currentColor" stroke="none" d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.89a8.27 8.27 0 004.84 1.55V7a4.85 4.85 0 01-1.07-.31z"/>';
+
+    if (phone) addRow('Phone', phone, 'tel:' + phone.replace(/\s/g, ''), phoneIcon);
+    if (ig)    addRow('Instagram', '@' + ig, 'https://instagram.com/' + ig, igIcon);
+    if (tt)    addRow('TikTok', '@' + tt, 'https://tiktok.com/@' + tt, ttIcon);
+
+    // Save contact as vCard
+    const saveBtn = document.getElementById('saveBtn');
+    let vcard = 'BEGIN:VCARD\nVERSION:3.0\n';
+    if (name)  vcard += 'FN:' + name + '\n';
+    if (title) vcard += 'TITLE:' + title + '\n';
+    if (phone) vcard += 'TEL:' + phone + '\n';
+    if (ig)    vcard += 'X-SOCIALPROFILE;type=instagram:@' + ig + '\n';
+    if (tt)    vcard += 'X-SOCIALPROFILE;type=tiktok:@' + tt + '\n';
+    vcard += 'END:VCARD';
+
+    const blob = new Blob([vcard], { type: 'text/vcard' });
+    saveBtn.href = URL.createObjectURL(blob);
+    saveBtn.download = (name || 'contact') + '.vcf';
+  </script>
+</body>
+</html>
